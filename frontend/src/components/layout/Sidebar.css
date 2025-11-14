@@ -1,0 +1,225 @@
+/* frontend/src/components/layout/Sidebar.css */
+.sidebar {
+  width: 280px;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+/* ✅ Sidebar público más compacto */
+.public-sidebar {
+  width: 220px;
+}
+
+.sidebar-header {
+  padding: 1.5rem 1rem 1rem;
+  border-bottom: 1px solid #eee;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+}
+
+.sidebar-header h1 {
+  color: white;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.sidebar-header p {
+  color: rgba(255,255,255,0.9);
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.user-info {
+  background: rgba(255,255,255,0.15);
+  padding: 0.4rem;
+  border-radius: 5px;
+  margin-top: 0.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.user-info strong {
+  color: white;
+  font-size: 0.85rem;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  font-size: 0.9rem;
+}
+
+.nav-item:hover {
+  background: #f8f9fa;
+  color: #2ecc71;
+  transform: translateX(5px);
+}
+
+.nav-item.active {
+  background: #e8f5e8;
+  color: #2ecc71;
+  border-left-color: #2ecc71;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  position: sticky;
+  bottom: 0;
+  background: white;
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 0.7rem;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+/* ✅ BOTÓN TOGGLE PARA MÓVIL */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1002;
+  background: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #27ae60;
+  transform: scale(1.05);
+}
+
+/* ✅ OVERLAY PARA MÓVIL */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* ✅ RESPONSIVE - MÓVIL */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 280px;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 15px rgba(0,0,0,0.3);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-toggle {
+    display: block;
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+  }
+  
+  /* Sidebar más compacto en móvil */
+  .sidebar-header {
+    padding: 1rem 0.8rem 0.8rem;
+  }
+  
+  .sidebar-header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .nav-item {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* ✅ TABLET */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar {
+    width: 240px;
+  }
+  
+  .public-sidebar {
+    width: 200px;
+  }
+  
+  .sidebar-header {
+    padding: 1.2rem 0.8rem 0.8rem;
+  }
+  
+  .sidebar-header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .nav-item {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* ✅ SCROLLBAR PERSONALIZADO */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #2ecc71;
+  border-radius: 10px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #27ae60;
+}

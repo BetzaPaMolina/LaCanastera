@@ -49,13 +49,11 @@ export const authAPI = {
   },
 };
 
+// frontend/src/services/api.js - Añadir nueva función
 export const userAPI = {
-  getVendedores: () => api.get('/users/vendedores')
-    .then(response => response)
-    .catch(error => {
-      console.error('Error en getVendedores:', error);
-      return { data: [] }; // ← Retornar array vacío en caso de error
-    }),
+  getVendedores: () => api.get('/users/vendedores'),
+  getActiveUsers: () => api.get('/users/active'), // ← NUEVA
+  updateProfile: (data) => api.put('/users/profile', data),
 };
 
 export default api;

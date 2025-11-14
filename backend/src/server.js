@@ -167,6 +167,25 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Ruta para obtener usuarios activos (público)
+app.get('/api/users/active', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    
+    const activeUsers = await User.find({
+      isActive: true
+    }).select('username userType profilePhoto vendorProfile location');
+    
+    res.json(activeUsers);
+  } catch (error) {
+    console.error('❌ Error obteniendo usuarios activos:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error obteniendo usuarios activos' 
+    });
+  }
+});
+
 // Ruta para obtener vendedores
 app.get('/api/users/vendedores', async (req, res) => {
   try {
