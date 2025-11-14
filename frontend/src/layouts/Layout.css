@@ -2,7 +2,6 @@
 .layout {
   display: flex;
   min-height: 100vh;
-  position: relative;
 }
 
 .layout-main {
@@ -10,62 +9,25 @@
   background: #f8f9fa;
   overflow-y: auto;
   transition: all 0.3s ease;
+  /* ✅ ELIMINAR márgenes fijos - usar flexbox natural */
 }
 
-/* ✅ Layout público - sidebar ocupa menos espacio */
-.public-layout .layout-main {
-  margin-left: 220px; /* Sidebar más estrecho para público */
-  padding: 0;
-}
-
-/* ✅ Layouts con usuario - sidebar normal */
+/* ✅ Layouts con usuario */
 .vendor-layout .layout-main,
 .client-layout .layout-main,
 .admin-layout .layout-main {
-  margin-left: 280px;
   padding: 20px;
 }
 
-/* ✅ RESPONSIVE - Diseño móvil primero */
-@media (max-width: 1024px) {
-  .public-layout .layout-main {
-    margin-left: 200px;
-  }
-  
-  .vendor-layout .layout-main,
-  .client-layout .layout-main,
-  .admin-layout .layout-main {
-    margin-left: 250px;
-  }
-}
-
+/* ✅ RESPONSIVE */
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
   }
   
-  .public-layout .layout-main,
   .vendor-layout .layout-main,
   .client-layout .layout-main,
   .admin-layout .layout-main {
-    margin-left: 0;
-    width: 100%;
     padding: 10px;
-  }
-  
-  /* Ocultar sidebar en móvil y mostrar botón toggle */
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-  
-  .sidebar.open {
-    transform: translateX(0);
-  }
-}
-
-@media (max-width: 480px) {
-  .layout-main {
-    padding: 5px;
   }
 }
