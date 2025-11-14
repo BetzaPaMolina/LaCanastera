@@ -67,6 +67,32 @@ export const AuthProvider = ({ children }) => {
     loading
   };
 
+  // En tu AuthContext.jsx - updateProfile function
+const updateProfile = async (formData) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/users/profile', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // No Content-Type for FormData - browser sets it automatically
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('Error updating profile');
+    }
+
+    const updatedUser = await response.json();
+    setUser(updatedUser);
+    return updatedUser;
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+
   return (
     <AuthContext.Provider value={value}>
       {children}
