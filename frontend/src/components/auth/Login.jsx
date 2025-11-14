@@ -1,4 +1,4 @@
-// frontend/src/components/auth/Login.jsx
+// frontend/src/components/auth/Login.jsx - MEJORADO
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -9,15 +9,28 @@ const Login = () => {
     username: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+
     try {
+      console.log('🔄 Iniciando proceso de login...');
       await login(formData.username, formData.password);
+      console.log('✅ Login exitoso');
     } catch (error) {
-      alert('Error en el login: ' + error.response?.data?.message);
+      console.error('❌ Error completo en login:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Error de conexión con el servidor';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -26,12 +39,21 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (error) setError('');
   };
 
   return (
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
         <h2>Iniciar Sesión en La Canastera</h2>
+        
+        {error && (
+          <div className="error-message">
+            ❌ {error}
+            <br />
+            <small>Verifica que el backend esté ejecutándose en puerto 5000</small>
+          </div>
+        )}
         
         <div className="form-group">
           <label>Usuario:</label>
@@ -41,6 +63,8 @@ const Login = () => {
             value={formData.username}
             onChange={handleChange}
             required
+            disabled={loading}
+            placeholder="Tu nombre de usuario"
           />
         </div>
 
@@ -52,14 +76,27 @@ const Login = () => {
             value={formData.password}
             onChange={handleChange}
             required
+            disabled={loading}
+            placeholder="Tu contraseña"
           />
         </div>
 
-        <button type="submit">Iniciar Sesión</button>
+        <button type="submit" disabled={loading} className={loading ? 'loading' : ''}>
+          {loading ? '🔄 Iniciando Sesión...' : '🚀 Iniciar Sesión'}
+        </button>
         
-        <p>
+        <p className="auth-link">
           ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
         </p>
+
+        <div className="debug-info">
+          <small>
+            <strong>Para desarrollo:</strong><br />
+            - Backend debe correr en puerto 5000<br />
+            - MongoDB debe estar ejecutándose<br />
+            - Revisa la consola para más detalles
+          </small>
+        </div>
       </form>
     </div>
   );

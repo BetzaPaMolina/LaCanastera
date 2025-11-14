@@ -1,4 +1,4 @@
-// backend/src/models/User.js
+// backend/src/models/User.js - VERSIÓN COMPLETA
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: false,
     sparse: true
   },
   password: {
@@ -31,8 +30,7 @@ const userSchema = new mongoose.Schema({
     default: ''
   },
   phone: {
-    type: String,
-    required: false
+    type: String
   },
   location: {
     lat: { type: Number, default: 0 },
@@ -47,8 +45,7 @@ const userSchema = new mongoose.Schema({
   vendorInfo: {
     vendorType: {
       type: String,
-      enum: ['canastera', 'ambulante'],
-      required: false
+      enum: ['canastera', 'ambulante']
     },
     age: { type: Number },
     birthDate: { type: Date },
@@ -66,8 +63,14 @@ const userSchema = new mongoose.Schema({
 // Hash password antes de guardar
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+  
+  try {
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Método para comparar passwords
