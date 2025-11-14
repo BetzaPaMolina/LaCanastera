@@ -50,7 +50,12 @@ export const authAPI = {
 };
 
 export const userAPI = {
-  getVendedores: () => api.get('/users/vendedores'),
+  getVendedores: () => api.get('/users/vendedores')
+    .then(response => response)
+    .catch(error => {
+      console.error('Error en getVendedores:', error);
+      return { data: [] }; // ← Retornar array vacío en caso de error
+    }),
 };
 
 export default api;

@@ -1,27 +1,33 @@
-// frontend/src/components/auth/Register.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
-import './Auth.css'; // AÑADIR ESTA LÍNEA
+import './Auth.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    userType: 'cliente',
-    email: '',
-    phone: ''
+    userType: 'cliente'
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const { register } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+
     try {
       await register(formData);
-      // Redirigir según el tipo de usuario
     } catch (error) {
-      alert('Error en el registro: ' + error.response?.data?.message);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Error al registrar usuario';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -30,13 +36,21 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    if (error) setError('');
   };
 
   return (
-    <div className="register-container">
-      <h2>Registrarse en La Canastera 🧺</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
+    <div className="auth-container">
+      <form onSubmit={handleSubmit} className="auth-form">
+        <h2>Unirse a La Canastera</h2>
+        
+        {error && (
+          <div className="error-message">
+            ❌ {error}
+          </div>
+        )}
+
+        <div className="form-group">
           <label>Usuario único:</label>
           <input
             type="text"
@@ -45,10 +59,12 @@ const Register = () => {
             onChange={handleChange}
             required
             minLength="3"
+            disabled={loading}
+            placeholder="Elige tu nombre de usuario"
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label>Contraseña:</label>
           <input
             type="password"
@@ -57,40 +73,32 @@ const Register = () => {
             onChange={handleChange}
             required
             minLength="6"
+            disabled={loading}
+            placeholder="Crea una contraseña segura"
           />
         </div>
 
-        <div>
-          <label>Tipo de usuario:</label>
-          <select name="userType" value={formData.userType} onChange={handleChange}>
-            <option value="cliente">Cliente</option>
-            <option value="canastera">Canastera</option>
-            <option value="vendedor_ambulante">Vendedor Ambulante</option>
-            <option value="admin">Administrador</option>
+        <div className="form-group">
+          <label>Quiero ser:</label>
+          <select 
+            name="userType" 
+            value={formData.userType} 
+            onChange={handleChange}
+            disabled={loading}
+          >
+            <option value="cliente">🛒 Cliente - Comprar productos</option>
+            <option value="canastera">🧺 Canastera - Vender mis productos</option>
+            <option value="vendedor_ambulante">🚶 Vendedor Ambulante - Vender productos</option>
           </select>
         </div>
 
-        <div>
-          <label>Email (opcional):</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label>Teléfono (opcional):</label>
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-        </div>
-
-        <button type="submit">Crear Cuenta</button>
+        <button type="submit" disabled={loading}>
+          {loading ? '🔄 Creando Cuenta...' : '🚀 Unirse a La Canastera'}
+        </button>
+        
+        <p className="auth-link">
+          ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
+        </p>
       </form>
     </div>
   );

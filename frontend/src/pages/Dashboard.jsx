@@ -15,16 +15,19 @@ const Dashboard = () => {
     loadVendedores();
   }, []);
 
-  const loadVendedores = async () => {
-    try {
-      const response = await userAPI.getVendedores();
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Error cargando vendedores:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+// En el useEffect, cambiar:
+const loadVendedores = async () => {
+  try {
+    const response = await userAPI.getVendedores();
+    console.log('Vendedores cargados:', response.data);
+    setUsers(response.data || []); // ← Asegurar array vacío si es undefined
+  } catch (error) {
+    console.error('Error cargando vendedores:', error);
+    setUsers([]); // ← Array vacío en caso de error
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleUserClick = (user) => {
     setSelectedUser(user);

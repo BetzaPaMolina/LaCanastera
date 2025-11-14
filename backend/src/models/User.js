@@ -1,4 +1,4 @@
-// backend/src/models/User.js - VERSIÓN COMPLETA
+// backend/src/models/User.js - CONFIRMAR QUE ESTÉ ASÍ
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -10,10 +10,6 @@ const userSchema = new mongoose.Schema({
     trim: true,
     minlength: 3,
     maxlength: 30
-  },
-  email: {
-    type: String,
-    sparse: true
   },
   password: {
     type: String,
@@ -29,8 +25,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  phone: {
-    type: String
+  contactInfo: {
+    email: { type: String, default: '' },
+    phone: { type: String, default: '' }
+  },
+  vendorProfile: {
+    age: { type: Number },
+    birthDate: { type: Date },
+    story: { type: String, maxlength: 500, default: '' },
+    hometown: { type: String, default: '' },
+    rating: { type: Number, default: 0, min: 0, max: 5 },
+    totalSales: { type: Number, default: 0 }
   },
   location: {
     lat: { type: Number, default: 0 },
@@ -40,27 +45,11 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  },
-  // Campos específicos para vendedores
-  vendorInfo: {
-    vendorType: {
-      type: String,
-      enum: ['canastera', 'ambulante']
-    },
-    age: { type: Number },
-    birthDate: { type: Date },
-    story: { type: String, maxlength: 500 },
-    hometown: { type: String },
-    rating: { type: Number, default: 0, min: 0, max: 5 },
-    totalSales: { type: Number, default: 0 },
-    badges: [{ type: String }],
-    iotDeviceId: { type: String }
   }
 }, {
   timestamps: true
 });
 
-// Hash password antes de guardar
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
@@ -73,7 +62,6 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Método para comparar passwords
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

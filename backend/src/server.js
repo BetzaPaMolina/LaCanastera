@@ -1,4 +1,4 @@
-// backend/src/server.js - VERSIÓN CORREGIDA
+// backend/src/server.js - VERSIÓN DEFINITIVA SIN ERRORES
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,20 +6,22 @@ require('dotenv').config();
 
 const app = express();
 
-// ✅ CORS SIMPLE Y FUNCIONAL
+// ==================== CONFIGURACIÓN INICIAL ====================
+
+// CORS simple para desarrollo
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
+  origin: 'http://localhost:5173'
 }));
 
 app.use(express.json());
 
-// ✅ CONEXIÓN MONGODB SIMPLIFICADA
+// Conexión a MongoDB
 mongoose.connect('mongodb://127.0.0.1:27017/la-canastera')
   .then(() => console.log('✅ Conectado a MongoDB'))
   .catch(err => console.error('❌ Error MongoDB:', err));
 
-// ✅ RUTAS DIRECTAS (evitar problemas de importación)
+// ==================== RUTAS DE LA API ====================
+
 // Ruta de salud
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -29,7 +31,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Ruta de registro
+// Ruta de registro - SOLO username, password, userType
 app.post('/api/auth/register', async (req, res) => {
   try {
     console.log('📝 Registro recibido:', req.body);
@@ -38,10 +40,25 @@ app.post('/api/auth/register', async (req, res) => {
     const jwt = require('jsonwebtoken');
     const { username, password, userType } = req.body;
     
+    // Validación básica
     if (!username || !password || !userType) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Faltan campos requeridos' 
+        message: 'Usuario, contraseña y tipo son requeridos' 
+      });
+    }
+
+    if (username.length < 3) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'El usuario debe tener al menos 3 caracteres' 
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'La contraseña debe tener al menos 6 caracteres' 
       });
     }
 
@@ -50,12 +67,17 @@ app.post('/api/auth/register', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Usuario ya existe' 
+        message: 'Este usuario ya está registrado' 
       });
     }
 
     // Crear usuario
-    const user = new User({ username, password, userType });
+    const user = new User({ 
+      username, 
+      password, 
+      userType 
+    });
+
     await user.save();
 
     // Generar token
@@ -67,7 +89,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Usuario registrado exitosamente',
+      message: `¡Bienvenido a La Canastera! Cuenta de ${userType} creada exitosamente`,
       token,
       user: {
         id: user._id,
@@ -152,7 +174,7 @@ app.get('/api/users/vendedores', async (req, res) => {
     
     const vendedores = await User.find({
       userType: { $in: ['canastera', 'vendedor_ambulante'] }
-    }).select('username userType profilePhoto');
+    }).select('username userType profilePhoto vendorProfile');
     
     res.json(vendedores);
   } catch (error) {
@@ -164,29 +186,39 @@ app.get('/api/users/vendedores', async (req, res) => {
   }
 });
 
-// ✅ MANEJO DE RUTAS NO ENCONTRADAS (FORMA CORRECTA)
-app.use((req, res) => {
-  res.status(404).json({ 
-    success: false,
-    message: 'Ruta no encontrada: ' + req.originalUrl,
-    availableRoutes: [
-      'GET /api/health',
-      'POST /api/auth/register',
-      'POST /api/auth/login', 
-      'GET /api/users/vendedores'
-    ]
-  });
+// ==================== MANEJO DE RUTAS NO ENCONTRADAS ====================
+
+// ✅ SOLUCIÓN: Middleware simple sin patrón problemático
+app.use((req, res, next) => {
+  if (!req.route) {
+    return res.status(404).json({ 
+      success: false,
+      message: 'Ruta no encontrada: ' + req.originalUrl,
+      availableRoutes: [
+        'GET /api/health',
+        'POST /api/auth/register', 
+        'POST /api/auth/login',
+        'GET /api/users/vendedores'
+      ]
+    });
+  }
+  next();
 });
 
-// ✅ INICIAR SERVIDOR
+// ==================== INICIAR SERVIDOR ====================
+
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log('='.repeat(50));
-  console.log('🚀 LA CANASTERA - BACKEND CORREGIDO');
+  console.log('🚀 LA CANASTERA - BACKEND FUNCIONANDO');
   console.log('='.repeat(50));
   console.log(`📍 Puerto: ${PORT}`);
   console.log(`🌐 Health: http://localhost:${PORT}/api/health`);
   console.log(`👤 Registro: POST http://localhost:${PORT}/api/auth/register`);
   console.log(`🔐 Login: POST http://localhost:${PORT}/api/auth/login`);
+  console.log(`🗺️  Frontend: http://localhost:5173`);
+  console.log('='.repeat(50));
+  console.log('💡 Backend listo para recibir peticiones');
   console.log('='.repeat(50));
 });

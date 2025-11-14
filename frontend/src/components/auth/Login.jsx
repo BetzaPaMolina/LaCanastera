@@ -1,4 +1,3 @@
-// frontend/src/components/auth/Login.jsx - MEJORADO
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -20,14 +19,11 @@ const Login = () => {
     setError('');
 
     try {
-      console.log('🔄 Iniciando proceso de login...');
       await login(formData.username, formData.password);
-      console.log('✅ Login exitoso');
     } catch (error) {
-      console.error('❌ Error completo en login:', error);
       const errorMessage = error.response?.data?.message || 
                           error.message || 
-                          'Error de conexión con el servidor';
+                          'Error de conexión';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -50,8 +46,6 @@ const Login = () => {
         {error && (
           <div className="error-message">
             ❌ {error}
-            <br />
-            <small>Verifica que el backend esté ejecutándose en puerto 5000</small>
           </div>
         )}
         
@@ -81,22 +75,13 @@ const Login = () => {
           />
         </div>
 
-        <button type="submit" disabled={loading} className={loading ? 'loading' : ''}>
+        <button type="submit" disabled={loading}>
           {loading ? '🔄 Iniciando Sesión...' : '🚀 Iniciar Sesión'}
         </button>
         
         <p className="auth-link">
           ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
         </p>
-
-        <div className="debug-info">
-          <small>
-            <strong>Para desarrollo:</strong><br />
-            - Backend debe correr en puerto 5000<br />
-            - MongoDB debe estar ejecutándose<br />
-            - Revisa la consola para más detalles
-          </small>
-        </div>
       </form>
     </div>
   );
