@@ -59,39 +59,42 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // 🔥 CORRECCIÓN: Esta función debe estar DENTRO del AuthProvider, no fuera
+  const updateProfile = async (formData) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Error updating profile');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setUser(result.user);
+      }
+      return result;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  };
+
+  // 🔥 INCLUYE updateProfile en el value
   const value = {
     user,
     login,
     register,
     logout,
+    updateProfile, // ✅ ¡No olvides esta línea!
     loading
   };
-
-  // En tu AuthContext.jsx - updateProfile function
-const updateProfile = async (formData) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch('/api/users/profile', {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        // No Content-Type for FormData - browser sets it automatically
-      },
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Error updating profile');
-    }
-
-    const updatedUser = await response.json();
-    setUser(updatedUser);
-    return updatedUser;
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    throw error;
-  }
-};
 
   return (
     <AuthContext.Provider value={value}>
