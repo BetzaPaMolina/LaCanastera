@@ -4,35 +4,34 @@ const User = require('../models/User');
 
 const auth = async (req, res, next) => {
   try {
+    console.log('🔐 Verificando autenticación...');
+    
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
-      return res.status(401).json({ message: 'Acceso denegado. No hay token.' });
+      console.log('❌ No hay token');
+      return res.status(401).json({ message: 'No token, authorization denied' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verificar token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    console.log('✅ Token decodificado:', decoded);
+    
+    // Buscar usuario
     const user = await User.findById(decoded.userId).select('-password');
     
     if (!user) {
-      return res.status(401).json({ message: 'Token inválido.' });
+      console.log('❌ Usuario no encontrado');
+      return res.status(401).json({ message: 'Token is not valid' });
     }
 
     req.user = user;
+    console.log('✅ Usuario autenticado:', user.username);
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token inválido.' });
+    console.error('❌ Error en auth middleware:', error.message);
+    res.status(401).json({ message: 'Token is not valid' });
   }
 };
 
-const authorize = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.userType)) {
-      return res.status(403).json({ 
-        message: 'No tienes permisos para realizar esta acción.' 
-      });
-    }
-    next();
-  };
-};
-
-module.exports = { auth, authorize };
+module.exports = auth;

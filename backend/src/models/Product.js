@@ -1,66 +1,64 @@
-// backend/src/models/Product.js
+// backend/models/Product.js
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-  vendorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   name: {
     type: String,
     required: true,
     trim: true
   },
-  category: {
+  description: {
     type: String,
-    required: true
-  },
-  priceType: {
-    type: String,
-    enum: ['unit', 'weight', 'dozen'],
-    required: true
+    default: ""
   },
   price: {
     type: Number,
     required: true,
     min: 0
   },
-  quantity: {
+  type: {
+    type: String,
+    enum: ['unit', 'weight'],
+    required: true
+  },
+  stock: {
     type: Number,
     required: true,
     min: 0
   },
-  unit: {
+  category: {
     type: String,
-    enum: ['unidades', 'libras', 'docenas'],
-    default: 'unidades'
+    required: true,
+    enum: ['vegetables', 'fruits', 'grains', 'dairy', 'meat', 'other']
   },
-  photo: {
+  image: {
     type: String,
+    default: ""
+  },
+  vendorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
-  },
-  // Datos de sensores IoT
-  sensorData: {
-    temperature: { type: Number },
-    humidity: { type: Number },
-    weight: { type: Number },
-    lastUpdated: { type: Date }
   },
   isActive: {
     type: Boolean,
     default: true
   },
-  description: {
-    type: String,
-    maxlength: 200
+  // Datos IoT (para el futuro)
+  temperature: {
+    type: Number,
+    default: null
+  },
+  humidity: {
+    type: Number,
+    default: null
+  },
+  currentWeight: {
+    type: Number,
+    default: null
   }
 }, {
-  timestamps: true
+  timestamps: true // Esto crea automáticamente createdAt y updatedAt
 });
-
-// Índice para búsquedas rápidas
-productSchema.index({ vendorId: 1, isActive: 1 });
-productSchema.index({ name: 'text', category: 'text' });
 
 module.exports = mongoose.model('Product', productSchema);

@@ -31,6 +31,53 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Importar y usar rutas de productos
+const productRoutes = require('./routes/products');
+app.use('/api/products', productRoutes);
+
+// Importar middleware de autenticación
+const auth = require('./middleware/auth');
+
+// Ruta para actualizar perfil de usuario
+app.put('/api/users/profile', auth, async (req, res) => {
+  try {
+    console.log('📝 Actualizando perfil para:', req.user.username);
+    
+    const User = require('./models/User');
+    const { username, contactInfo, vendorProfile } = req.body;
+
+    // Buscar y actualizar usuario
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { 
+        username,
+        contactInfo,
+        vendorProfile,
+        profilePhoto: req.body.profilePhoto // Manejar subida de imagen después
+      },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Perfil actualizado exitosamente',
+      user
+    });
+  } catch (error) {
+    console.error('❌ Error actualizando perfil:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error del servidor: ' + error.message 
+    });
+  }
+});
+// === FIN DE LAS LÍNEAS A AGREGAR ===
+
+
 // Ruta de registro - SOLO username, password, userType
 app.post('/api/auth/register', async (req, res) => {
   try {
