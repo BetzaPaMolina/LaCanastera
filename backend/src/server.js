@@ -1,4 +1,4 @@
-// backend/src/server.js - VERSIÓN DEFINITIVA SIN ERRORES
+// backend/src/server.js - VERSIÓN COMPLETA ACTUALIZADA
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -38,30 +38,50 @@ app.use('/api/products', productRoutes);
 // Importar middleware de autenticación
 const auth = require('./middleware/auth');
 
-// Ruta para actualizar perfil de usuario
+// ==================== ACTUALIZAR PERFIL ====================
 app.put('/api/users/profile', auth, async (req, res) => {
   try {
     console.log('📝 Actualizando perfil para:', req.user.username);
+    console.log('📦 Datos recibidos:', req.body);
     
     const User = require('./models/User');
-    const { username, contactInfo, vendorProfile } = req.body;
+    const updateData = {};
+
+    // Campos básicos
+    if (req.body.username) updateData.username = req.body.username;
+    
+    // Información de contacto
+    if (req.body.email || req.body.phone) {
+      updateData.contactInfo = {
+        email: req.body.email || req.user.contactInfo?.email || '',
+        phone: req.body.phone || req.user.contactInfo?.phone || ''
+      };
+    }
+
+    // Perfil de vendedor
+    if (req.body.age || req.body.birthDate || req.body.story || req.body.hometown) {
+      updateData.vendorProfile = {
+        age: req.body.age || req.user.vendorProfile?.age,
+        birthDate: req.body.birthDate || req.user.vendorProfile?.birthDate,
+        story: req.body.story || req.user.vendorProfile?.story || '',
+        hometown: req.body.hometown || req.user.vendorProfile?.hometown || ''
+      };
+    }
+
+    console.log('🔄 Datos a actualizar:', updateData);
 
     // Buscar y actualizar usuario
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { 
-        username,
-        contactInfo,
-        vendorProfile,
-        profilePhoto: req.body.profilePhoto // Manejar subida de imagen después
-      },
-      { new: true }
+      { $set: updateData },
+      { new: true, runValidators: true }
     ).select('-password');
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
     }
 
+    console.log('✅ Perfil actualizado exitosamente');
     res.json({
       success: true,
       message: 'Perfil actualizado exitosamente',
@@ -75,10 +95,33 @@ app.put('/api/users/profile', auth, async (req, res) => {
     });
   }
 });
-// === FIN DE LAS LÍNEAS A AGREGAR ===
 
+// ==================== OBTENER PERFIL ====================
+app.get('/api/users/profile', auth, async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const user = await User.findById(req.user._id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
 
-// Ruta de registro - SOLO username, password, userType
+    res.json({
+      success: true,
+      user
+    });
+  } catch (error) {
+    console.error('❌ Error obteniendo perfil:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error del servidor: ' + error.message 
+    });
+  }
+});
+
+// ==================== RUTAS DE AUTENTICACIÓN ====================
+
+// Ruta de registro
 app.post('/api/auth/register', async (req, res) => {
   try {
     console.log('📝 Registro recibido:', req.body);
@@ -214,6 +257,8 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// ==================== RUTAS DE USUARIOS ====================
+
 // Ruta para obtener usuarios activos (público)
 app.get('/api/users/active', async (req, res) => {
   try {
@@ -254,7 +299,6 @@ app.get('/api/users/vendedores', async (req, res) => {
 
 // ==================== MANEJO DE RUTAS NO ENCONTRADAS ====================
 
-// ✅ SOLUCIÓN: Middleware simple sin patrón problemático
 app.use((req, res, next) => {
   if (!req.route) {
     return res.status(404).json({ 
@@ -264,7 +308,9 @@ app.use((req, res, next) => {
         'GET /api/health',
         'POST /api/auth/register', 
         'POST /api/auth/login',
-        'GET /api/users/vendedores'
+        'GET /api/users/vendedores',
+        'GET /api/users/profile',
+        'PUT /api/users/profile'
       ]
     });
   }
