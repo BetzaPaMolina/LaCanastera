@@ -233,20 +233,7 @@ const MapComponent = ({ users = [], onUserClick, currentUser }) => {
         </MapContainer>
       </div>
 
-      <div className="map-info-panel">
-        <div className="info-section">
-          <h4>💡 Mejora la precisión:</h4>
-          <ul>
-            <li>✅ <strong>Conéctate a WiFi</strong> - Mejora la precisión</li>
-            <li>✅ <strong>Abre en celular</strong> - GPS más preciso</li>
-            <li>✅ <strong>Activa "Seguimiento"</strong> - Actualización automática</li>
-          </ul>
-        </div>
-        
-        <div className="tech-info">
-          <p><strong>¿Por qué la diferencia?</strong><br />Computadora: IP/WiFi (~100-1000m)<br />Celular: GPS+WiFi+redes (~5-50m)</p>
-        </div>
-      </div>
+      
     </div>
   );
 };
