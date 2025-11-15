@@ -1,16 +1,18 @@
-// backend/src/server.js - VERSIÓN COMPLETA ACTUALIZADA
+// backend/src/server.js - VERSIÓN CON HTTPS
+
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 
-// ==================== CONFIGURACIÓN INICIAL ====================
-
-// CORS simple para desarrollo
+// CORS
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin: 'https://localhost:5173', // ✅ Ahora usa HTTPS
+  credentials: true
 }));
 
 app.use(express.json());
@@ -20,117 +22,19 @@ mongoose.connect('mongodb://127.0.0.1:27017/la-canastera')
   .then(() => console.log('✅ Conectado a MongoDB'))
   .catch(err => console.error('❌ Error MongoDB:', err));
 
-// ==================== RUTAS DE LA API ====================
-
-// Ruta de salud
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: '✅ BACKEND FUNCIONANDO', 
-    project: 'La Canastera',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Importar y usar rutas de productos
+// ==================== RUTAS ====================
 const productRoutes = require('./routes/products');
 app.use('/api/products', productRoutes);
 
-// Importar middleware de autenticación
 const auth = require('./middleware/auth');
 
-// ==================== ACTUALIZAR PERFIL ====================
-app.put('/api/users/profile', auth, async (req, res) => {
-  try {
-    console.log('📝 Actualizando perfil para:', req.user.username);
-    console.log('📦 Datos recibidos:', req.body);
-    
-    const User = require('./models/User');
-    const updateData = {};
-
-    // Campos básicos
-    if (req.body.username) updateData.username = req.body.username;
-    
-    // Información de contacto
-    if (req.body.email || req.body.phone) {
-      updateData.contactInfo = {
-        email: req.body.email || req.user.contactInfo?.email || '',
-        phone: req.body.phone || req.user.contactInfo?.phone || ''
-      };
-    }
-
-    // Perfil de vendedor
-    if (req.body.age || req.body.birthDate || req.body.story || req.body.hometown) {
-      updateData.vendorProfile = {
-        age: req.body.age || req.user.vendorProfile?.age,
-        birthDate: req.body.birthDate || req.user.vendorProfile?.birthDate,
-        story: req.body.story || req.user.vendorProfile?.story || '',
-        hometown: req.body.hometown || req.user.vendorProfile?.hometown || ''
-      };
-    }
-
-    console.log('🔄 Datos a actualizar:', updateData);
-
-    // Buscar y actualizar usuario
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-    }
-
-    console.log('✅ Perfil actualizado exitosamente');
-    res.json({
-      success: true,
-      message: 'Perfil actualizado exitosamente',
-      user
-    });
-  } catch (error) {
-    console.error('❌ Error actualizando perfil:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error del servidor: ' + error.message 
-    });
-  }
-});
-
-// ==================== OBTENER PERFIL ====================
-app.get('/api/users/profile', auth, async (req, res) => {
-  try {
-    const User = require('./models/User');
-    const user = await User.findById(req.user._id).select('-password');
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-    }
-
-    res.json({
-      success: true,
-      user
-    });
-  } catch (error) {
-    console.error('❌ Error obteniendo perfil:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error del servidor: ' + error.message 
-    });
-  }
-});
-
-// ==================== RUTAS DE AUTENTICACIÓN ====================
-
-// Ruta de registro
+// Rutas de autenticación
 app.post('/api/auth/register', async (req, res) => {
   try {
-    console.log('📝 Registro recibido:', req.body);
-    
     const User = require('./models/User');
     const jwt = require('jsonwebtoken');
     const { username, password, userType } = req.body;
     
-    // Validación básica
     if (!username || !password || !userType) {
       return res.status(400).json({ 
         success: false, 
@@ -138,21 +42,6 @@ app.post('/api/auth/register', async (req, res) => {
       });
     }
 
-    if (username.length < 3) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'El usuario debe tener al menos 3 caracteres' 
-      });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'La contraseña debe tener al menos 6 caracteres' 
-      });
-    }
-
-    // Verificar si usuario existe
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ 
@@ -161,25 +50,18 @@ app.post('/api/auth/register', async (req, res) => {
       });
     }
 
-    // Crear usuario
-    const user = new User({ 
-      username, 
-      password, 
-      userType 
-    });
-
+    const user = new User({ username, password, userType });
     await user.save();
 
-    // Generar token
     const token = jwt.sign(
       { userId: user._id, userType: user.userType },
-      process.env.JWT_SECRET || 'fallback-secret',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     res.status(201).json({
       success: true,
-      message: `¡Bienvenido a La Canastera! Cuenta de ${userType} creada exitosamente`,
+      message: `¡Bienvenido a La Canastera!`,
       token,
       user: {
         id: user._id,
@@ -196,23 +78,12 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// Ruta de login
 app.post('/api/auth/login', async (req, res) => {
   try {
-    console.log('🔐 Login recibido:', req.body);
-    
     const User = require('./models/User');
     const jwt = require('jsonwebtoken');
     const { username, password } = req.body;
     
-    if (!username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Usuario y contraseña requeridos' 
-      });
-    }
-
-    // Buscar usuario
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(400).json({ 
@@ -221,7 +92,6 @@ app.post('/api/auth/login', async (req, res) => {
       });
     }
 
-    // Verificar contraseña
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ 
@@ -230,10 +100,9 @@ app.post('/api/auth/login', async (req, res) => {
       });
     }
 
-    // Generar token
     const token = jwt.sign(
       { userId: user._id, userType: user.userType },
-      process.env.JWT_SECRET || 'fallback-secret',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -257,20 +126,80 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// ==================== RUTAS DE USUARIOS ====================
+// Rutas de usuarios
+app.get('/api/users/profile', auth, async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const user = await User.findById(req.user._id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
 
-// Ruta para obtener usuarios activos (público)
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error del servidor: ' + error.message 
+    });
+  }
+});
+
+app.put('/api/users/profile', auth, async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const updateData = {};
+
+    if (req.body.username) updateData.username = req.body.username;
+    
+    if (req.body.email || req.body.phone) {
+      updateData.contactInfo = {
+        email: req.body.email || req.user.contactInfo?.email || '',
+        phone: req.body.phone || req.user.contactInfo?.phone || ''
+      };
+    }
+
+    if (req.body.age || req.body.birthDate || req.body.story || req.body.hometown) {
+      updateData.vendorProfile = {
+        age: req.body.age || req.user.vendorProfile?.age,
+        birthDate: req.body.birthDate || req.user.vendorProfile?.birthDate,
+        story: req.body.story || req.user.vendorProfile?.story || '',
+        hometown: req.body.hometown || req.user.vendorProfile?.hometown || ''
+      };
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Perfil actualizado exitosamente',
+      user
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error del servidor: ' + error.message 
+    });
+  }
+});
+
 app.get('/api/users/active', async (req, res) => {
   try {
     const User = require('./models/User');
-    
     const activeUsers = await User.find({
       isActive: true
     }).select('username userType profilePhoto vendorProfile location');
     
     res.json(activeUsers);
   } catch (error) {
-    console.error('❌ Error obteniendo usuarios activos:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Error obteniendo usuarios activos' 
@@ -278,18 +207,15 @@ app.get('/api/users/active', async (req, res) => {
   }
 });
 
-// Ruta para obtener vendedores
 app.get('/api/users/vendedores', async (req, res) => {
   try {
     const User = require('./models/User');
-    
     const vendedores = await User.find({
       userType: { $in: ['canastera', 'vendedor_ambulante'] }
     }).select('username userType profilePhoto vendorProfile');
     
     res.json(vendedores);
   } catch (error) {
-    console.error('❌ Error obteniendo vendedores:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Error obteniendo vendedores' 
@@ -297,40 +223,37 @@ app.get('/api/users/vendedores', async (req, res) => {
   }
 });
 
-// ==================== MANEJO DE RUTAS NO ENCONTRADAS ====================
+// ==================== CONFIGURACIÓN HTTPS ====================
 
-app.use((req, res, next) => {
-  if (!req.route) {
-    return res.status(404).json({ 
-      success: false,
-      message: 'Ruta no encontrada: ' + req.originalUrl,
-      availableRoutes: [
-        'GET /api/health',
-        'POST /api/auth/register', 
-        'POST /api/auth/login',
-        'GET /api/users/vendedores',
-        'GET /api/users/profile',
-        'PUT /api/users/profile'
-      ]
-    });
-  }
-  next();
-});
+// 1. Opción con certificados autofirmados (desarrollo)
+const httpsOptions = {
+  key: fs.readFileSync('./cert/key.pem'),
+  cert: fs.readFileSync('./cert/cert.pem')
+};
 
-// ==================== INICIAR SERVIDOR ====================
+// 2. Para producción, usa certificados reales (Let's Encrypt)
+/*
+const httpsOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/tudominio.com/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/tudominio.com/fullchain.pem')
+};
+*/
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+// Crear servidor HTTPS
+https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log('='.repeat(50));
-  console.log('🚀 LA CANASTERA - BACKEND FUNCIONANDO');
+  console.log('🚀 LA CANASTERA - BACKEND HTTPS FUNCIONANDO');
   console.log('='.repeat(50));
   console.log(`📍 Puerto: ${PORT}`);
-  console.log(`🌐 Health: http://localhost:${PORT}/api/health`);
-  console.log(`👤 Registro: POST http://localhost:${PORT}/api/auth/register`);
-  console.log(`🔐 Login: POST http://localhost:${PORT}/api/auth/login`);
-  console.log(`🗺️  Frontend: http://localhost:5173`);
-  console.log('='.repeat(50));
-  console.log('💡 Backend listo para recibir peticiones');
+  console.log(`🔒 HTTPS: https://localhost:${PORT}/api/health`);
   console.log('='.repeat(50));
 });
+
+// Opcional: Redirigir HTTP a HTTPS
+const http = require('http');
+http.createServer((req, res) => {
+  res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+  res.end();
+}).listen(80);
