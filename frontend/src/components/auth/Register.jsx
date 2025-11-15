@@ -1,3 +1,4 @@
+// frontend/src/components/auth/Register.jsx - VERSIÓN MODERNA
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -43,17 +44,19 @@ const Register = () => {
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
         <h2>Unirse a La Canastera</h2>
+        <p>Crea tu cuenta y comienza a vender o comprar</p>
         
         {error && (
           <div className="error-message">
-            ❌ {error}
+            {error}
           </div>
         )}
 
         <div className="form-group">
-          <label>Usuario único:</label>
+          <label htmlFor="username">Usuario único:</label>
           <input
             type="text"
+            id="username"
             name="username"
             value={formData.username}
             onChange={handleChange}
@@ -65,22 +68,24 @@ const Register = () => {
         </div>
 
         <div className="form-group">
-          <label>Contraseña:</label>
+          <label htmlFor="password">Contraseña:</label>
           <input
             type="password"
+            id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             required
             minLength="6"
             disabled={loading}
-            placeholder="Crea una contraseña segura"
+            placeholder="Mínimo 6 caracteres"
           />
         </div>
 
         <div className="form-group">
-          <label>Quiero ser:</label>
+          <label htmlFor="userType">Quiero ser:</label>
           <select 
+            id="userType"
             name="userType" 
             value={formData.userType} 
             onChange={handleChange}
@@ -88,17 +93,26 @@ const Register = () => {
           >
             <option value="cliente">🛒 Cliente - Comprar productos</option>
             <option value="canastera">🧺 Canastera - Vender mis productos</option>
-            <option value="vendedor_ambulante">🚶 Vendedor Ambulante - Vender productos</option>
+            <option value="vendedor_ambulante">🚶 Vendedor Ambulante</option>
           </select>
         </div>
 
         <button type="submit" disabled={loading}>
-          {loading ? '🔄 Creando Cuenta...' : '🚀 Unirse a La Canastera'}
+          {loading ? (
+            <>
+              <span className="loading-spinner"></span>
+              Creando cuenta...
+            </>
+          ) : (
+            '🚀 Unirse a La Canastera'
+          )}
         </button>
         
-        <p className="auth-link">
-          ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
-        </p>
+        <div className="auth-link">
+          <p>
+            ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
+          </p>
+        </div>
       </form>
     </div>
   );

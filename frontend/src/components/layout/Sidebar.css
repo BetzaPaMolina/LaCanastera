@@ -1,19 +1,18 @@
-/* frontend/src/components/layout/Sidebar.css */
+/* frontend/src/components/layout/Sidebar.css - VERSIÓN MORADA */
 .sidebar {
-  width: 220px; /* Sidebar público más compacto */
+  width: 220px;
   background: white;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
   height: 100vh;
-  position: fixed; /* ✅ Mantener fixed */
+  position: fixed;
   left: 0;
   top: 0;
   z-index: 1000;
   overflow-y: auto;
 }
 
-/* ✅ Sidebar público más compacto */
 .public-sidebar {
   width: 220px;
 }
@@ -21,7 +20,8 @@
 .sidebar-header {
   padding: 1.5rem 1rem 1rem;
   border-bottom: 1px solid #eee;
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  /* ✅ GRADIENTE MORADO EN LUGAR DE VERDE */
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
   color: white;
   position: sticky;
   top: 0;
@@ -73,15 +73,15 @@
 }
 
 .nav-item:hover {
-  background: #f8f9fa;
-  color: #2ecc71;
+  background: #f4ecf7; /* ✅ Fondo morado claro al hover */
+  color: #8e44ad; /* ✅ Texto morado */
   transform: translateX(5px);
 }
 
 .nav-item.active {
-  background: #e8f5e8;
-  color: #2ecc71;
-  border-left-color: #2ecc71;
+  background: #f4ecf7; /* ✅ Fondo morado claro */
+  color: #8e44ad; /* ✅ Texto morado */
+  border-left-color: #9b59b6; /* ✅ Borde morado */
   font-weight: 600;
 }
 
@@ -91,6 +91,13 @@
   position: sticky;
   bottom: 0;
   background: white;
+}
+
+.sidebar-footer p {
+  text-align: center;
+  color: #666;
+  font-size: 0.85rem;
+  margin: 0;
 }
 
 .logout-btn {
@@ -117,7 +124,8 @@
   top: 15px;
   left: 15px;
   z-index: 1002;
-  background: #2ecc71;
+  /* ✅ Botón morado */
+  background: #9b59b6;
   color: white;
   border: none;
   border-radius: 5px;
@@ -129,7 +137,7 @@
 }
 
 .sidebar-toggle:hover {
-  background: #27ae60;
+  background: #8e44ad;
   transform: scale(1.05);
 }
 
@@ -152,6 +160,7 @@
     width: 280px;
     transform: translateX(-100%);
     box-shadow: 2px 0 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
   }
   
   .sidebar.open {
@@ -166,7 +175,6 @@
     display: block;
   }
   
-  /* Sidebar más compacto en móvil */
   .sidebar-header {
     padding: 1rem 0.8rem 0.8rem;
   }
@@ -207,14 +215,13 @@
     font-size: 1.2rem;
   }
   
-  
   .nav-item {
     padding: 0.7rem 0.8rem;
     font-size: 0.85rem;
   }
 }
 
-/* ✅ SCROLLBAR PERSONALIZADO */
+/* ✅ SCROLLBAR PERSONALIZADO MORADO */
 .sidebar-nav::-webkit-scrollbar {
   width: 4px;
 }
@@ -224,12 +231,12 @@
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: #2ecc71;
+  background: #9b59b6; /* ✅ Morado */
   border-radius: 10px;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: #27ae60;
+  background: #8e44ad; /* ✅ Morado oscuro */
 }
 
 /* ✅ Sidebar para usuarios logueados un poco más ancho */

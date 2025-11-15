@@ -1,15 +1,16 @@
-/* frontend/src/pages/Home.css */
+/* frontend/src/pages/Home.css - VERSIÓN CORREGIDA */
 .home-public {
   min-height: 100vh;
   background: #f8f9fa;
 }
 
 .home-header {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  /* ✅ GRADIENTE MORADO */
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
   color: white;
   padding: 2rem;
   text-align: center;
-  margin-left: 220px; /* ✅ Ajustado al sidebar público */
+  /* ✅ YA NO necesita margin-left porque Layout.css lo maneja */
   transition: margin-left 0.3s ease;
 }
 
@@ -27,7 +28,7 @@
 
 .map-section {
   padding: 2rem;
-  margin-left: 220px; /* ✅ Ajustado al sidebar público */
+  /* ✅ YA NO necesita margin-left porque Layout.css lo maneja */
   transition: margin-left 0.3s ease;
   min-height: 60vh;
 }
@@ -37,7 +38,7 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
   padding: 2rem;
-  margin-left: 220px; /* ✅ Ajustado al sidebar público */
+  /* ✅ YA NO necesita margin-left porque Layout.css lo maneja */
   background: white;
   transition: margin-left 0.3s ease;
 }
@@ -47,14 +48,15 @@
   padding: 2rem;
   border-radius: 12px;
   text-align: center;
-  border-left: 4px solid #2ecc71;
+  /* ✅ Borde morado */
+  border-left: 4px solid #9b59b6;
   transition: all 0.3s ease;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
 .info-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 20px rgba(155, 89, 182, 0.2); /* ✅ Sombra morada */
 }
 
 .info-card h3 {
@@ -74,7 +76,7 @@
   .home-header,
   .map-section,
   .public-info {
-    margin-left: 200px;
+    /* No hay margen adicional - Layout.css lo maneja */
   }
 }
 
@@ -82,7 +84,7 @@
   .home-header,
   .map-section,
   .public-info {
-    margin-left: 0;
+    /* No hay margen adicional - Layout.css lo maneja */
     padding: 1rem;
   }
   

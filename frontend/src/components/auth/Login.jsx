@@ -1,3 +1,4 @@
+// frontend/src/components/auth/Login.jsx - VERSIÓN MODERNA
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -41,18 +42,20 @@ const Login = () => {
   return (
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
-        <h2>Iniciar Sesión en La Canastera</h2>
+        <h2>Iniciar Sesión</h2>
+        <p>Bienvenido de vuelta a La Canastera</p>
         
         {error && (
           <div className="error-message">
-            ❌ {error}
+            {error}
           </div>
         )}
         
         <div className="form-group">
-          <label>Usuario:</label>
+          <label htmlFor="username">Usuario:</label>
           <input
             type="text"
+            id="username"
             name="username"
             value={formData.username}
             onChange={handleChange}
@@ -63,9 +66,10 @@ const Login = () => {
         </div>
 
         <div className="form-group">
-          <label>Contraseña:</label>
+          <label htmlFor="password">Contraseña:</label>
           <input
             type="password"
+            id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
@@ -76,12 +80,21 @@ const Login = () => {
         </div>
 
         <button type="submit" disabled={loading}>
-          {loading ? '🔄 Iniciando Sesión...' : '🚀 Iniciar Sesión'}
+          {loading ? (
+            <>
+              <span className="loading-spinner"></span>
+              Iniciando sesión...
+            </>
+          ) : (
+            '🚀 Iniciar Sesión'
+          )}
         </button>
         
-        <p className="auth-link">
-          ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
-        </p>
+        <div className="auth-link">
+          <p>
+            ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
+          </p>
+        </div>
       </form>
     </div>
   );

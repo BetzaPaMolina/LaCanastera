@@ -1,4 +1,4 @@
-/* frontend/src/layouts/Layout.css */
+/* frontend/src/layouts/Layout.css - VERSIÓN CORREGIDA */
 .layout {
   display: flex;
   min-height: 100vh;
@@ -9,13 +9,22 @@
   background: #f8f9fa;
   overflow-y: auto;
   transition: all 0.3s ease;
-  /* ✅ ELIMINAR márgenes fijos - usar flexbox natural */
+  /* ✅ SOLUCIÓN: Añadir margin-left para que no tape el sidebar */
+  margin-left: 220px; /* Ancho del sidebar público */
+  padding: 20px;
 }
 
-/* ✅ Layouts con usuario */
+/* ✅ Layouts con usuario logueado (sidebar más ancho) */
 .vendor-layout .layout-main,
 .client-layout .layout-main,
 .admin-layout .layout-main {
+  margin-left: 250px; /* Ancho del sidebar de usuario */
+  padding: 20px;
+}
+
+/* ✅ Layout público */
+.public-layout .layout-main {
+  margin-left: 220px; /* Ancho del sidebar público */
   padding: 20px;
 }
 
@@ -25,9 +34,27 @@
     flex-direction: column;
   }
   
+  /* En móvil NO hay margen porque el sidebar se esconde */
+  .layout-main,
+  .vendor-layout .layout-main,
+  .client-layout .layout-main,
+  .admin-layout .layout-main,
+  .public-layout .layout-main {
+    margin-left: 0;
+    padding: 10px;
+    padding-top: 60px; /* Espacio para el botón toggle */
+  }
+}
+
+/* ✅ TABLET */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .public-layout .layout-main {
+    margin-left: 200px;
+  }
+  
   .vendor-layout .layout-main,
   .client-layout .layout-main,
   .admin-layout .layout-main {
-    padding: 10px;
+    margin-left: 240px;
   }
 }
